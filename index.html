@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lớp Học Không Biên Giới: Dạy Học Kết Nối Tại Tiểu Học Tả Phìn (Sa Pa)</title>
+  <meta name="description" content="Khám phá mô hình Dạy học kết nối – bước tiến mới trong Giáo dục thông minh tại trường Tiểu học Tả Phìn (TX Sa Pa) kết nối cùng Tiểu học thị trấn Bắc Hà.">
+  
+  <!-- Favicon & Icons -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎒</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts: Be Vietnam Pro & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,600;1,700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'Be Vietnam Pro', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+            heading: ['Be Vietnam Pro', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              blue: '#0284c7',
+              sky: '#38bdf8',
+              yellow: '#facc15',
+              green: '#10b981',
+              orange: '#f97316',
+              purple: '#8b5cf6',
+              pink: '#ec4899',
+              dark: '#0f172a'
+            }
+          },
+          animation: {
+            'bounce-slow': 'bounce 3s infinite',
+            'float': 'floating 4s ease-in-out infinite',
+            'pulse-soft': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            floating: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 999px; border: 2px solid #f1f5f9; }
+    ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+
+    #reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #facc15, #f97316, #ec4899, #0284c7);
+      width: 0%;
+      z-index: 100;
+      transition: width 0.1s ease-out;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .sapa-hero-bg {
+      background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 40%, #ffffff 100%);
+    }
+
+    .interactive-card {
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .interactive-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 20px 30px -10px rgba(14, 165, 233, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-300 selection:text-slate-900">
+
+  <!-- Thanh đọc bài tiến độ -->
+  <div id="reading-progress"></div>
+
+  <!-- Nút tiện ích: Đọc to bằng giọng nói & Nhảy lên đầu trang -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+    <button id="tts-btn" onclick="toggleTextToSpeech()" title="Bật/Tắt đọc bằng giọng nói cho học sinh" class="w-14 h-14 bg-gradient-to-tr from-amber-500 to-yellow-400 text-white rounded-full shadow-2xl flex items-center justify-center text-xl hover:scale-110 active:scale-95 transition-all border-4 border-white group">
+      <i class="fa-solid fa-volume-high group-hover:animate-bounce"></i>
+      <span class="absolute right-16 bg-slate-900 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        🔊 Nghe đọc bài báo
+      </span>
+    </button>
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Về đầu trang" class="w-12 h-12 bg-white text-sky-600 rounded-full shadow-lg flex items-center justify-center text-lg hover:bg-sky-50 active:scale-95 transition-all border border-sky-200">
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+  </div>
+
+  <!-- HEADER BÁO ĐIỆN TỬ HỌC SINH -->
+  <header class="border-b border-sky-100 bg-white/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Logo Báo Học Đường -->
+      <div class="flex items-center gap-3">
+        <span class="text-3xl animate-bounce-slow">🏔️</span>
+        <div>
+          <span class="text-xs font-black tracking-widest text-sky-600 uppercase flex items-center gap-1.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            CHUYÊN SAN GIÁO DỤC SA PA & BẮC HÀ
+          </span>
+          <h1 class="text-lg md:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            Măng Non Tri Thức <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full border border-amber-300 font-bold">Số Đặc Biệt</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Thông tin Sa Pa -->
+      <div class="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-500 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+        <span class="flex items-center gap-1"><i class="fa-regular fa-calendar text-sky-500"></i> Năm Học 2023 - 2024</span>
+        <span>•</span>
+        <span class="flex items-center gap-1"><i class="fa-solid fa-cloud-sun text-amber-500"></i> Tả Phìn 19°C (Mát mẻ)</span>
+      </div>
+
+      <!-- Nút thả hoa chúc mừng -->
+      <div>
+        <button onclick="triggerConfetti()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 transform active:scale-95 transition-all">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Bắn Pháo Hoa! 🎉
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION: BÌA BÁO ĐIỆN TỬ SÔI ĐỘNG -->
+  <section class="sapa-hero-bg pt-8 pb-14 px-4 relative overflow-hidden">
+    <div class="absolute top-6 left-10 text-4xl opacity-40 animate-float">☁️</div>
+    <div class="absolute top-12 right-12 text-5xl opacity-30 animate-float" style="animation-delay: 2s;">☁️</div>
+    <div class="absolute bottom-4 left-1/4 text-2xl opacity-20">✨</div>
+    <div class="absolute top-1/3 right-1/4 text-3xl opacity-25">🎓</div>
+
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+      <!-- Badge Danh mục -->
+      <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-sky-200 px-4 py-1.5 rounded-full shadow-sm mb-5 animate-pulse-soft">
+        <span class="text-base">🚀</span>
+        <span class="text-xs md:text-sm font-bold text-sky-700 uppercase tracking-wider">Chuyển Đổi Số Học Đường 4.0</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+      </div>
+
+      <!-- Tiêu đề chính -->
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight md:leading-snug mb-6 font-heading">
+        Dạy Học Kết Nối – Bước Tiến Mới Trong Hệ Thống 
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500">“Giáo Dục Thông Minh”</span>
+        <br class="hidden sm:inline">
+        Tại Trường Tiểu Học Tả Phìn, Sa Pa
+      </h2>
+
+      <!-- Subtitle & Tác giả -->
+      <div class="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-600 font-medium max-w-2xl mx-auto">
+        <span class="flex items-center gap-1.5 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+          <i class="fa-solid fa-school text-sky-600"></i> Trường Tiểu học Tả Phìn, TX Sa Pa
+        </span>
+        <span class="flex items-center gap-1.5 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+          <i class="fa-solid fa-handshake-angle text-emerald-600"></i> Kết nối cùng TH TT Bắc Hà
+        </span>
+        <span class="flex items-center gap-1.5 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+          <i class="fa-solid fa-users text-purple-600"></i> Lớp 4A1 Cô Mai Thị Nghị
+        </span>
+      </div>
+
+      <!-- Hộp giới thiệu ngắn (Lead Paragraph) -->
+      <div class="mt-8 bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-7 shadow-xl border-2 border-sky-200 text-left relative">
+        <div class="absolute -top-4 left-6 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-extrabold uppercase px-3 py-1 rounded-full shadow">
+          📌 Tin Tức Nổi Bật
+        </div>
+        <p class="text-slate-700 text-base sm:text-lg leading-relaxed font-semibold italic text-justify">
+          &ldquo;Không còn khoảng cách núi rừng cheo leo, chỉ cần một màn hình lớn và đường truyền Internet thần tốc, các bạn nhỏ lớp 4A1 trường Tiểu học Tả Phìn đã cùng bắt tay, cùng học tập và cùng hát vang với các bạn học sinh Tiểu học thị trấn Bắc Hà trong một giờ học đặc biệt tràn ngập tiếng cười!&rdquo;
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- NỘI DUNG CHÍNH (MAIN ARTICLE BODY) -->
+  <main class="max-w-4xl mx-auto px-4 py-8 space-y-12">
+
+    <!-- PHẦN 1: MỞ ĐẦU & BỐI CẢNH LỚP HỌC KẾT NỐI -->
+    <article class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-100 relative">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+        <span class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center font-black text-lg">01</span>
+        <div>
+          <span class="text-xs font-bold text-sky-600 uppercase tracking-widest">Đổi Mới Phương Pháp</span>
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900">Khi Lớp Học Vượt Qua Đèo Cao Vách Núi</h3>
+        </div>
+      </div>
+
+      <div class="text-slate-700 text-base sm:text-lg leading-relaxed space-y-4 text-justify font-sans">
+        <p>
+          Tiếp tục đẩy mạnh triển khai ứng dụng <strong>Công nghệ thông tin (CNTT)</strong> và <strong>chuyển đổi số</strong> trong dạy học và kiểm tra đánh giá; tiếp tục duy trì, triển khai hình thức dạy học trực tuyến kết hợp dạy học trực tiếp nhằm hỗ trợ nâng cao chất lượng, hiệu quả dạy - học và đổi mới phương pháp dạy - học; <strong>trường Tiểu học Tả Phìn</strong> đã kết hợp với <strong>trường Tiểu học thị trấn Bắc Hà</strong> thực hiện tiết học kết nối tại lớp <strong>4A1</strong>, do cô giáo <strong>Mai Thị Nghị</strong> làm chủ nhiệm.
+        </p>
+
+        <!-- Thẻ tương tác vui cho bé -->
+        <div class="bg-amber-50 rounded-2xl p-5 border border-amber-200 mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="text-3xl animate-bounce">💡</span>
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base">Bạn nhỏ có biết &ldquo;Dạy học kết nối&rdquo; kỳ diệu thế nào không?</h4>
+              <p class="text-xs sm:text-sm text-slate-600">Đó là chiếc cầu nối số thần kỳ đưa 2 lớp học ở 2 huyện miền núi xa xôi về chung một mái trường!</p>
+            </div>
+          </div>
+          <button onclick="showFunFact()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs sm:text-sm font-black px-4 py-2 rounded-xl shadow transition-all whitespace-nowrap">
+            Khám phá ngay! ✨
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- HÌNH ẢNH 1: KHỞI ĐỘNG VÀ KHÔNG KHÍ SÔI NỔI -->
+    <section class="interactive-card bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-sky-200">
+      <div class="relative group">
+        <img src="images/image1.jpeg" alt="Bài khởi động đầu giờ của học sinh 2 trường Tiểu học Tả Phìn và Tiểu học thị trấn Bắc Hà" class="w-full h-auto object-cover max-h-[550px] transition-transform duration-500 group-hover:scale-[1.02]">
+        
+        <div class="absolute top-4 left-4 bg-sky-600/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
+          <i class="fa-solid fa-camera"></i> ẢNH THỰC TẾ TIẾT HỌC
+        </div>
+      </div>
+      
+      <!-- Chú thích ảnh chuẩn báo chí học sinh -->
+      <div class="p-5 sm:p-6 bg-gradient-to-r from-sky-50 via-white to-blue-50 border-t border-sky-100">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl mt-0.5">📸</span>
+          <div>
+            <p class="font-bold text-slate-800 text-sm sm:text-base leading-snug">
+              Hình 1: Bài khởi động đầu giờ đầy sôi nổi và hào hứng của các em học sinh 2 trường Tiểu học Tả Phìn và Tiểu học thị trấn Bắc Hà.
+            </p>
+            <p class="text-xs text-sky-700 mt-1.5 font-medium flex items-center gap-2">
+              <span><i class="fa-solid fa-location-dot"></i> Lớp 4A1 - Trường TH Tả Phìn, TX Sa Pa</span>
+              <span>•</span>
+              <span><i class="fa-solid fa-clock"></i> Tiết học kết nối liên huyện</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 2: LỜI CHIA SẺ CÔ GIÁO & CẢM XÚC 60 HỌC SINH -->
+    <article class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-100">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+        <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg">02</span>
+        <div>
+          <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Tiếng Nói Người Trong Cuộc</span>
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900">60 Bạn Học Sinh Và Tiết Học &ldquo;Không Khoảng Cách&rdquo;</h3>
+        </div>
+      </div>
+
+      <div class="text-slate-700 text-base sm:text-lg leading-relaxed space-y-5 text-justify">
+        <p>
+          Với sự kết nối của lãnh đạo hai nhà trường, tiết học kết nối được diễn ra với sự tham gia của toàn thể cán bộ, giáo viên cùng <strong>60 em học sinh lớp 4</strong> của cả hai nhà trường.
+        </p>
+
+        <!-- Quote Block Cô Mai Thị Nghị -->
+        <div class="relative bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 sm:p-8 border-l-8 border-emerald-500 shadow-sm my-6">
+          <span class="text-5xl text-emerald-300 font-serif absolute top-2 right-4 opacity-50">&ldquo;</span>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-12 h-12 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center font-bold text-xl">
+              👩‍🏫
+            </div>
+            <div>
+              <h4 class="font-extrabold text-slate-900 text-base sm:text-lg">Cô giáo Mai Thị Nghị</h4>
+              <p class="text-xs sm:text-sm text-emerald-700 font-semibold">Giáo viên chủ nhiệm lớp 4A1, người trực tiếp đứng lớp</p>
+            </div>
+          </div>
+          <blockquote class="italic text-slate-800 text-base sm:text-lg font-medium leading-relaxed">
+            &ldquo;Mô hình <strong>&lsquo;Lớp học kết nối&rsquo;</strong> là hình thức dạy học ứng dụng CNTT vào giảng dạy. Đây cũng là hình thức dạy học phát huy tối đa được hứng thú học tập của học sinh, tạo điều kiện để các em được giao lưu, học hỏi lẫn nhau. Bản thân tôi trong quá trình giảng dạy cũng được nâng cao chuyên môn, nghiệp vụ qua các phương pháp dạy học của trường bạn.&rdquo;
+          </blockquote>
+        </div>
+
+        <p>
+          Qua màn hình trực tuyến, từng câu hỏi thảo luận, bài hát tập thể hay những tràng pháo tay đều được truyền đi lập tức. Các bạn nhỏ Tả Phìn tự tin giao lưu, học hỏi kinh nghiệm cùng các bạn học sinh Bắc Hà trong không khí chan hòa, hứng khởi.
+        </p>
+      </div>
+    </article>
+
+    <!-- HÌNH ẢNH 2: TẬP THỂ & TƯƠNG TÁC LỚP HỌC -->
+    <section class="interactive-card bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-emerald-200">
+      <div class="relative group">
+        <img src="images/image2.jpeg" alt="Tổ chuyên môn và các em học sinh lớp học kết nối tại trường TH Tả Phìn" class="w-full h-auto object-cover max-h-[580px] transition-transform duration-500 group-hover:scale-[1.02]">
+        
+        <div class="absolute top-4 left-4 bg-emerald-600/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
+          <i class="fa-solid fa-heart"></i> HÌNH ẢNH ẤN TƯỢNG
+        </div>
+      </div>
+      
+      <!-- Chú thích ảnh 2 -->
+      <div class="p-5 sm:p-6 bg-gradient-to-r from-emerald-50 via-white to-teal-50 border-t border-emerald-100">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl mt-0.5">🌟</span>
+          <div>
+            <p class="font-bold text-slate-800 text-sm sm:text-base leading-snug">
+              Hình 2: Các em học sinh chăm chú theo dõi bài giảng, trao đổi và tương tác sôi nổi cùng các thầy cô trong buổi học kết nối.
+            </p>
+            <p class="text-xs text-emerald-700 mt-1.5 font-medium flex items-center gap-2">
+              <span><i class="fa-solid fa-user-group"></i> 60 học sinh cùng toàn thể cán bộ, giáo viên 2 trường</span>
+              <span>•</span>
+              <span><i class="fa-solid fa-check-circle"></i> Tiết học thành công rực rỡ</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHẦN 3: CƠ SỞ VẬT CHẤT & CHIA SẺ TỪ HIỆU TRƯỞNG -->
+    <article class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-100">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+        <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-black text-lg">03</span>
+        <div>
+          <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">Nền Tảng Công Nghệ</span>
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900">100% Lớp Học Phủ Sóng Internet & Màn Hình Tivi Thông Minh</h3>
+        </div>
+      </div>
+
+      <div class="text-slate-700 text-base sm:text-lg leading-relaxed space-y-4 text-justify">
+        <p>
+          Bên cạnh đó, công tác tuyên truyền nâng cao nhận thức cho cán bộ quản lý, giáo viên về vai trò và kết quả của ứng dụng công nghệ thông tin, chuyển đổi số trong các hoạt động giáo dục, công tác bồi dưỡng kỹ năng khai thác, ứng dụng CNTT trong nhà trường cũng được chú trọng đặc biệt.
+        </p>
+
+        <!-- Thẻ trích lời Cô Ong Thị Hiên - Hiệu Trưởng -->
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 sm:p-8 border-l-8 border-amber-500 shadow-sm my-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-12 h-12 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center font-bold text-xl">
+              🏆
+            </div>
+            <div>
+              <h4 class="font-extrabold text-slate-900 text-base sm:text-lg">Cô Ong Thị Hiên</h4>
+              <p class="text-xs sm:text-sm text-amber-700 font-semibold">Hiệu trưởng trường Tiểu học Tả Phìn, thị xã Sa Pa</p>
+            </div>
+          </div>
+          <blockquote class="italic text-slate-800 text-base sm:text-lg font-medium leading-relaxed">
+            &ldquo;Năm học 2023-2024, nhà trường đã huy động từ các nguồn để trang bị <strong>tivi cho 15/15 phòng học</strong>, phòng bộ môn tại điểm trường chính. Đồng thời, <strong>100% các lớp học có mạng Internet</strong> để phục vụ nhu cầu dạy – học của toàn trường. Trong thời gian tới, nhà trường tiếp tục hoàn thiện về cơ sở vật chất cũng như nâng cao chất lượng đội ngũ để đáp ứng đổi mới giáo dục theo <strong>chương trình GDPT 2018</strong>.&rdquo;
+          </blockquote>
+        </div>
+
+        <!-- 3 CỘT THỐNG KÊ ẤN TƯỢNG -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+          <div class="bg-sky-50 rounded-2xl p-4 text-center border border-sky-200 interactive-card">
+            <span class="text-3xl font-black text-sky-600 block">15/15</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-700 mt-1 block">Phòng học có Tivi</span>
+            <span class="text-[11px] text-sky-600 font-medium">Tại điểm trường chính Tả Phìn</span>
+          </div>
+          <div class="bg-emerald-50 rounded-2xl p-4 text-center border border-emerald-200 interactive-card">
+            <span class="text-3xl font-black text-emerald-600 block">100%</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-700 mt-1 block">Phủ sóng mạng Internet</span>
+            <span class="text-[11px] text-emerald-600 font-medium">Kết nối thông suốt toàn trường</span>
+          </div>
+          <div class="bg-purple-50 rounded-2xl p-4 text-center border border-purple-200 interactive-card">
+            <span class="text-3xl font-black text-purple-600 block">GDPT 2018</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-700 mt-1 block">Đổi mới phương pháp</span>
+            <span class="text-[11px] text-purple-600 font-medium">Nâng cao chuyên môn giáo viên</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- PHẦN 4: TẦM NHÌN TƯƠNG LAI & MỞ RỘNG MÔ HÌNH -->
+    <article class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-100">
+      <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+        <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-black text-lg">04</span>
+        <div>
+          <span class="text-xs font-bold text-purple-600 uppercase tracking-widest">Tương Lai Rộng Mở</span>
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900">Vươn Xa: Mở Rộng Kết Nối Với Các Trường Trong & Ngoài Tỉnh</h3>
+        </div>
+      </div>
+
+      <div class="text-slate-700 text-base sm:text-lg leading-relaxed space-y-4 text-justify">
+        <p>
+          Nhận thấy mô hình <strong>&ldquo;lớp học kết nối&rdquo;</strong> là phương pháp dạy học tích cực mà thầy và trò có thể sử dụng các công cụ kết nối trực tuyến dựa trên nền tảng công nghệ thông tin để hỗ trợ cho việc dạy và học; phát huy tính chủ động, sáng tạo của học sinh, góp phần nâng cao hiệu quả dạy học.
+        </p>
+        <p>
+          Từ năm học <strong>2023-2024</strong>, mô hình &ldquo;dạy học kết nối&rdquo; sẽ được nhà trường áp dụng rộng rãi tại các khối lớp để kết nối với các trường trên địa bàn thị xã Sa Pa cũng như các trường bạn trong và ngoài tỉnh Lào Cai, mở ra một chân trời học tập mới đầy hứng khởi cho học sinh vùng cao.
+        </p>
+
+        <!-- Ký tên trang trọng -->
+        <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
+          <div class="font-bold text-purple-700 flex items-center gap-2">
+            <i class="fa-solid fa-pen-nib"></i> Bài viết do: <strong>Tổ chuyên môn khối 4 – Trường TH Tả Phìn</strong>
+          </div>
+          <div class="text-slate-500 font-medium">
+            Thị xã Sa Pa, tỉnh Lào Cai
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- GÓC TƯƠNG TÁC CHO HỌC SINH: MINI QUIZ -->
+    <section class="bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 text-white rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+      <div class="absolute -right-8 -bottom-8 text-8xl opacity-10">🎮</div>
+      
+      <div class="relative z-10 max-w-2xl mx-auto text-center">
+        <span class="bg-white/20 backdrop-blur-sm text-yellow-300 font-black text-xs uppercase px-3 py-1 rounded-full border border-white/20 mb-3 inline-block">
+          Góc Thử Thách Vui 🎯
+        </span>
+        <h3 class="text-2xl sm:text-3xl font-black mb-3">Em Đã Nắm Rõ Bài Báo Chưa?</h3>
+        <p class="text-sky-100 text-sm sm:text-base mb-6">Hãy cùng trả lời câu đố nhanh để nhận huy hiệu học sinh xuất sắc nhé!</p>
+
+        <!-- Khung câu hỏi -->
+        <div id="quiz-box" class="bg-white text-slate-800 rounded-2xl p-6 shadow-xl text-left">
+          <div class="text-xs font-bold text-sky-600 uppercase mb-1">Câu hỏi số 1:</div>
+          <h4 class="font-extrabold text-base sm:text-lg mb-4 text-slate-900">
+            Lớp 4A1 trường Tiểu học Tả Phìn đã kết nối học tập với trường tiểu học nào?
+          </h4>
+
+          <div class="space-y-2.5">
+            <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 hover:border-sky-400 hover:bg-sky-50 font-semibold text-sm transition-all flex items-center justify-between">
+              <span>A. Tiểu học thị xã Sa Pa</span>
+            </button>
+            <button onclick="checkAnswer(this, true)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 hover:border-sky-400 hover:bg-sky-50 font-semibold text-sm transition-all flex items-center justify-between">
+              <span>B. Tiểu học thị trấn Bắc Hà</span>
+            </button>
+            <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-xl border-2 border-slate-200 hover:border-sky-400 hover:bg-sky-50 font-semibold text-sm transition-all flex items-center justify-between">
+              <span>C. Tiểu học TP Lào Cai</span>
+            </button>
+          </div>
+
+          <div id="quiz-result" class="mt-4 p-3 rounded-xl hidden text-sm font-bold"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GỬI LỜI CHÚC TỚI THẦY CÔ VÀ CÁC BẠN NHỎ TẢ PHÌN -->
+    <section class="bg-amber-50 border-2 border-dashed border-amber-300 rounded-3xl p-6 sm:p-8 text-center">
+      <span class="text-4xl mb-2 inline-block">💌</span>
+      <h3 class="text-xl sm:text-2xl font-black text-slate-900 mb-2">Gửi Một Lời Chúc Đến Thầy Cô & Các Bạn Nhỏ Tả Phìn!</h3>
+      <p class="text-slate-600 text-sm max-w-md mx-auto mb-5">Bấm nút thả tim bên dưới để chúc cho mô hình Lớp học kết nối ngày càng phát triển nhé!</p>
+      
+      <div class="flex items-center justify-center gap-4">
+        <button onclick="likeArticle()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg flex items-center gap-2 text-base active:scale-95 transition-all">
+          <i class="fa-solid fa-heart animate-ping"></i>
+          <span>Thả Tim</span>
+          <span id="like-count" class="bg-rose-700 text-xs px-2 py-0.5 rounded-full ml-1">128</span>
+        </button>
+
+        <button onclick="copyShareLink()" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-5 py-3 rounded-2xl shadow border border-slate-200 flex items-center gap-2 text-base active:scale-95 transition-all">
+          <i class="fa-solid fa-share-nodes text-sky-500"></i>
+          <span>Chia Sẻ Bài Báo</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER BÁO ĐIỆN TỬ -->
+  <footer class="bg-slate-900 text-slate-300 py-12 px-4 mt-16 border-t-4 border-sky-500">
+    <div class="max-w-4xl mx-auto text-center space-y-4">
+      <div class="flex items-center justify-center gap-2 text-2xl font-black text-white">
+        <span>🎒</span> Trường Tiểu Học Tả Phìn - Thị Xã Sa Pa
+      </div>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+        Chuyên trang tin tức giáo dục - Ứng dụng công nghệ thông tin và chuyển đổi số trường học. Tôn vinh tinh thần đổi mới sáng tạo theo chương trình GDPT 2018.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 pt-4 border-t border-slate-800">
+        <span>📍 Xã Tả Phìn, thị xã Sa Pa, tỉnh Lào Cai</span>
+        <span>•</span>
+        <span>🏫 Cụm kết nối: Trường Tiểu học thị trấn Bắc Hà</span>
+        <span>•</span>
+        <span>✨ Thiết kế báo điện tử tương tác học sinh</span>
+      </div>
+      <div class="text-[11px] text-slate-400 pt-3">
+        &copy; 2026 Bản quyền thuộc Trường Tiểu Học Tả Phìn & Tổ Chuyên Môn Khối 4.
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT HIỆU ỨNG TƯƠNG TÁC ĐA PHƯƠNG TIỆN -->
+  <script>
+    // 1. Thanh tiến độ đọc (Reading Progress)
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    // 2. Hiệu ứng bắn pháo hoa Confetti chúc mừng
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    // Tự động bắn pháo hoa nhẹ khi vừa mở trang
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
+        }
+      }, 800);
+    });
+
+    // 3. Khám phá nhanh (Fun Fact)
+    function showFunFact() {
+      alert("🌟 Điều kỳ diệu của Dạy Học Kết Nối:\n\nKhoảng cách từ xã Tả Phìn (Sa Pa) sang thị trấn Bắc Hà là hơn 100km đường đèo quanh co mất gần 3 giờ chạy xe! Nhưng nhờ công nghệ màn hình tivi thông minh và mạng Internet, các bạn chỉ mất đúng... 1 giây để cùng nhìn thấy và trò chuyện với nhau! 🚀");
+      triggerConfetti();
+    }
+
+    // 4. Mini Quiz tương tác
+    function checkAnswer(btn, isCorrect) {
+      const resultDiv = document.getElementById('quiz-result');
+      const allButtons = btn.parentElement.querySelectorAll('button');
+      
+      allButtons.forEach(b => {
+        b.disabled = true;
+      });
+
+      if (isCorrect) {
+        btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+        resultDiv.className = "mt-4 p-4 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold block";
+        resultDiv.innerHTML = "🎉 CHÍNH XÁC 100%! Bạn thật là thông minh. Lớp 4A1 trường TH Tả Phìn đã kết nối với trường Tiểu học thị trấn Bắc Hà!";
+        triggerConfetti();
+      } else {
+        btn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+        resultDiv.className = "mt-4 p-4 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 font-bold block";
+        resultDiv.innerHTML = "Ồ chưa chính xác rồi! Đáp án đúng là <strong>B. Tiểu học thị trấn Bắc Hà</strong>. Đừng buồn nhé, hãy tiếp tục cố gắng! 🌸";
+      }
+    }
+
+    // 5. Thả tim tương tác
+    let count = 128;
+    function likeArticle() {
+      count++;
+      document.getElementById('like-count').innerText = count;
+      triggerConfetti();
+    }
+
+    // 6. Sao chép link
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Đã sao chép liên kết bài báo! Hãy gửi cho bạn bè và thầy cô cùng xem nhé! 🚀');
+    }
+
+    // 7. Tính năng giọng đọc Text-to-Speech (Tiếng Việt)
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+    let speechUtterance = null;
+
+    function toggleTextToSpeech() {
+      if (!('speechSynthesis' in window)) {
+        alert("Trình duyệt của bạn chưa hỗ trợ giọng đọc tự động.");
+        return;
+      }
+
+      const ttsBtn = document.getElementById('tts-btn');
+
+      if (isSpeaking) {
+        synth.cancel();
+        isSpeaking = false;
+        ttsBtn.classList.remove('ring-4', 'ring-rose-400');
+        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        return;
+      }
+
+      const articleText = "Bài báo: Dạy học kết nối – bước tiến mới trong hệ thống Giáo dục thông minh tại trường Tiểu học Tả Phìn, thị xã Sa Pa. Tiếp tục đẩy mạnh triển khai ứng dụng công nghệ thông tin và chuyển đổi số trong dạy học. Trường Tiểu học Tả Phìn đã kết hợp với trường Tiểu học thị trấn Bắc Hà thực hiện tiết học kết nối tại lớp 4A1 do cô giáo Mai Thị Nghị làm chủ nhiệm. Tiết học kết nối diễn ra với sự tham gia của 60 em học sinh lớp 4 của cả hai nhà trường.";
+
+      speechUtterance = new SpeechSynthesisUtterance(articleText);
+      speechUtterance.lang = 'vi-VN';
+      speechUtterance.rate = 0.95;
+
+      speechUtterance.onend = () => {
+        isSpeaking = false;
+        ttsBtn.classList.remove('ring-4', 'ring-rose-400');
+        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+      };
+
+      speechUtterance.onerror = () => {
+        isSpeaking = false;
+        ttsBtn.classList.remove('ring-4', 'ring-rose-400');
+        ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+      };
+
+      synth.speak(speechUtterance);
+      isSpeaking = true;
+      ttsBtn.classList.add('ring-4', 'ring-rose-400');
+      ttsBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+    }
+  </script>
+</body>
+</html>
